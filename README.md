@@ -80,7 +80,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ```bash
 npm run dev
 ```
-Visit [http://localhost:3000](http://localhost:3000) to access the application.
+Visit [http://localhost:7236](http://localhost:7236) to access the application.
 
 ---
 

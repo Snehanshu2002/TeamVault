@@ -61,16 +61,16 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Link href="/admin/conversations">
+            <Link href="/admin/tracking">
               <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-md shadow-indigo-600/30">
-                <Eye className="w-4 h-4" />
-                <span>Observe Team Chats</span>
+                <Activity className="w-4 h-4" />
+                <span>Live Device Tracking</span>
               </Button>
             </Link>
-            <Link href="/demo/chat">
-              <Button size="sm" variant="outline" className="bg-slate-900 border-slate-700 text-slate-200 hover:bg-slate-800">
-                <SplitSquareVertical className="w-4 h-4" />
-                <span>Live 2-User Demo</span>
+            <Link href="/admin/conversations">
+              <Button size="sm" variant="outline" className="bg-slate-900 border-slate-700 text-slate-200 hover:bg-slate-800 font-bold">
+                <Eye className="w-4 h-4" />
+                <span>Observe Chats</span>
               </Button>
             </Link>
           </div>

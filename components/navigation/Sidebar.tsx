@@ -17,6 +17,7 @@ import {
   Layers,
   Building,
   SplitSquareVertical,
+  Laptop,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -33,6 +34,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     if (user?.role === 'PLATFORM_SUPER_ADMIN') {
       return [
         { label: 'Overview', href: '/super-admin', icon: LayoutDashboard },
+        { label: 'Live Device Tracking', href: '/super-admin/tracking', icon: Laptop, badge: 'Live' },
         { label: 'Organizations', href: '/super-admin/organizations', icon: Building, badge: 'Tenants' },
         { label: 'Admins', href: '/super-admin/admins', icon: Shield },
         { label: 'Users', href: '/super-admin/users', icon: Users },
@@ -46,6 +48,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     if (user?.role === 'ORGANIZATION_ADMIN') {
       return [
         { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+        { label: 'User & Laptop Tracking', href: '/admin/tracking', icon: Laptop, badge: 'Live' },
         { label: 'Teams', href: '/admin/teams', icon: Layers },
         { label: 'Users', href: '/admin/users', icon: Users },
         { label: 'Conversations', href: '/admin/conversations', icon: MessageSquare, badge: 'Live Audit' },

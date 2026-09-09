@@ -90,8 +90,8 @@ export function useChat(activeConversationId?: string, currentUser?: Profile | n
       setSending(true);
       try {
         const newMsg = ChatService.sendMessage(activeConversationId, user.id, text.trim());
-        setMessages((prev) => {
-          if (prev.some((m) => m.id === newMsg.id)) return prev;
+        setMessages((prev: Message[]) => {
+          if (prev.some((m: Message) => m.id === newMsg.id)) return prev;
           return [...prev, newMsg];
         });
         loadConversations();

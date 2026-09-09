@@ -157,3 +157,47 @@ export interface DemoPersona {
   description: string;
   avatarColor: string;
 }
+
+export interface UserSession {
+  id: string;
+  user_id: string;
+  user_name: string;
+  user_handle: string;
+  role: UserRole;
+  organization_id: string;
+  organization_name?: string;
+  team_names: string[];
+  device_type: 'Laptop / Desktop' | 'Mobile Workstation' | 'Tablet';
+  os: string;
+  browser: string;
+  screen_resolution: string;
+  ip_address: string;
+  network_type: 'Corporate LAN' | 'Remote VPN' | 'Direct Fiber';
+  location: string;
+  latitude: number;
+  longitude: number;
+  city: string;
+  region: string;
+  country: string;
+  postal_code?: string;
+  isp_provider: string;
+  connection_speed?: string;
+  status: 'ONLINE' | 'IDLE' | 'AWAY' | 'OFFLINE';
+  last_heartbeat: string;
+  session_started_at: string;
+  active_window_title: string;
+  daily_messages_sent: number;
+}
+
+export interface ActivityEvent {
+  id: string;
+  organization_id: string;
+  user_id: string;
+  user_name: string;
+  user_handle: string;
+  event_type: 'LOGIN' | 'MESSAGE_SENT' | 'TEAM_SWITCH' | 'TAB_ACTIVE' | 'TAB_IDLE' | 'DEVICE_CONNECTED' | 'SESSION_TERMINATED';
+  description: string;
+  timestamp: string;
+  ip_address: string;
+  device_info: string;
+}

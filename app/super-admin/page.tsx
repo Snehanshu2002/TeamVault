@@ -18,7 +18,8 @@ import {
   Lock, 
   SplitSquareVertical, 
   Server,
-  Sparkles
+  Sparkles,
+  Laptop
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -48,16 +49,16 @@ export default function SuperAdminDashboardPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Link href="/super-admin/admins">
+            <Link href="/super-admin/tracking">
               <Button size="sm" className="bg-rose-600 hover:bg-rose-700 text-white font-bold shadow-md shadow-rose-600/30">
-                <ShieldCheck className="w-4 h-4" />
-                <span>Manage Admins</span>
+                <Laptop className="w-4 h-4" />
+                <span>Live Device Tracking</span>
               </Button>
             </Link>
-            <Link href="/demo/chat">
+            <Link href="/super-admin/admins">
               <Button size="sm" variant="outline" className="bg-slate-900 border-slate-700 text-slate-200 hover:bg-slate-800">
-                <SplitSquareVertical className="w-4 h-4" />
-                <span>2-User Demo</span>
+                <ShieldCheck className="w-4 h-4" />
+                <span>Manage Admins</span>
               </Button>
             </Link>
           </div>
