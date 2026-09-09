@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Client Workflow & Demo Guide - Private Team Chat SaaS</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+    @page {
+      size: A4;
+      margin: 18mm 15mm 18mm 15mm;
+      @bottom-right {
+        content: counter(page);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #0f172a;
+      background: #ffffff;
+      line-height: 1.5;
+      font-size: 13px;
+    }
+
+    .cover {
+      page-break-after: always;
+      padding-top: 40px;
+      text-align: center;
+    }
+
+    .badge-top {
+      display: inline-block;
+      padding: 6px 16px;
+      background: #e0e7ff;
+      color: #4338ca;
+      font-weight: 700;
+      font-size: 11px;
+      border-radius: 9999px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    h1.title {
+      font-size: 28px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+
+    h2.subtitle {
+      font-size: 16px;
+      font-weight: 600;
+      color: #4f46e5;
+      margin-bottom: 25px;
+    }
+
+    .meta-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px;
+      max-width: 500px;
+      margin: 0 auto 30px auto;
+      text-align: left;
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 12px;
+    }
+
+    .meta-row:last-child {
+      border-bottom: none;
+    }
+
+    .meta-label {
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    .meta-val {
+      color: #0f172a;
+      font-weight: 700;
+    }
+
+    .section {
+      margin-bottom: 28px;
+      page-break-inside: avoid;
+    }
+
+    h2.sec-heading {
+      font-size: 18px;
+      font-weight: 800;
+      color: #0f172a;
+      border-bottom: 2px solid #4f46e5;
+      padding-bottom: 6px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    h3.sub-heading {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 14px 0 8px 0;
+    }
+
+    p {
+      color: #334155;
+      margin-bottom: 10px;
+      font-size: 12.5px;
+      line-height: 1.6;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 11.5px;
+    }
+
+    th {
+      background: #0f172a;
+      color: #ffffff;
+      padding: 8px 10px;
+      text-align: left;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #e2e8f0;
+      color: #334155;
+    }
+
+    tr:nth-child(even) td {
+      background: #f8fafc;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 10px;
+    }
+
+    .badge-green { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .badge-blue { background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; }
+    .badge-amber { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .badge-red { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+
+    .diagram-card {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 16px;
+      margin: 14px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      line-height: 1.4;
+      color: #0f172a;
+    }
+
+    .tree-box {
+      border: 1px solid #94a3b8;
+      background: #ffffff;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin: 6px 0;
+      display: inline-block;
+    }
+
+    .tree-level-1 { margin-left: 0px; font-weight: bold; background: #e0e7ff; border-color: #6366f1; color: #312e81; }
+    .tree-level-2 { margin-left: 20px; font-weight: 600; background: #f1f5f9; border-color: #0284c7; color: #0369a1; }
+    .tree-level-3 { margin-left: 40px; font-weight: 600; background: #fef3c7; border-color: #d97706; color: #92400e; }
+    .tree-level-4 { margin-left: 60px; font-weight: 500; background: #ecfdf5; border-color: #059669; color: #065f46; }
+    .tree-level-5 { margin-left: 80px; font-weight: normal; background: #ffffff; border-color: #cbd5e1; color: #334155; }
+
+    .callout {
+      border-left: 4px solid #4f46e5;
+      background: #eef2ff;
+      padding: 12px 14px;
+      border-radius: 0 8px 8px 0;
+      margin: 12px 0;
+      font-size: 12px;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 10.5px;
+      color: #94a3b8;
+      margin-top: 30px;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- COVER PAGE -->
+  <div class="cover">
+    <div class="badge-top">Enterprise SaaS Specification</div>
+    <h1 class="title">Private Team Chat Management System</h1>
+    <h2 class="subtitle">Client Workflow & Live Demonstration Guide</h2>
+
+    <div class="meta-box">
+      <div class="meta-row"><span class="meta-label">Product Type:</span><span class="meta-val">Multi-Tenant Team Messaging SaaS</span></div>
+      <div class="meta-row"><span class="meta-label">Target Users:</span><span class="meta-val">Enterprises, Regulated Teams, Compliance</span></div>
+      <div class="meta-row"><span class="meta-label">UI/UX Paradigm:</span><span class="meta-val">WhatsApp Web & Mobile App Experience</span></div>
+      <div class="meta-row"><span class="meta-label">Security Architecture:</span><span class="meta-val">PostgreSQL RLS + PII Sanitization</span></div>
+      <div class="meta-row"><span class="meta-label">Realtime Latency:</span><span class="meta-val">&lt; 50ms (Zero-Refresh Event Sync)</span></div>
+      <div class="meta-row"><span class="meta-label">Prepared Date:</span><span class="meta-val">September 2026</span></div>
+    </div>
+
+    <div class="callout" style="max-width: 540px; margin: 0 auto; text-align: left;">
+      <strong>Purpose of this Document:</strong> This document outlines the end-to-end architecture, user hierarchy, security guardrails, and step-by-step walkthrough scripts for evaluating the Private Team Chat Management System.
+    </div>
+  </div>
+
+  <!-- SECTION 1: SYSTEM HIERARCHY TREE -->
+  <div class="section">
+    <h2 class="sec-heading">1. Organization & Role Hierarchy (Tree Structure)</h2>
+    <p>The system enforces a strict multi-level governance structure. Communication and administration are strictly bound by tenant and team membership:</p>
+
+    <div class="diagram-card">
+      <div class="tree-box tree-level-1">👑 [ROOT] PLATFORM SUPER ADMIN (Global System Owner)</div><br>
+      │<br>
+      ├── <div class="tree-box tree-level-2">🏢 TENANT 1: Acme Corporation</div><br>
+      │   │<br>
+      │   ├── <div class="tree-box tree-level-3">🛡️ ORG ADMIN 1: Alex Vance (Assigned: Team Alpha &amp; Beta)</div><br>
+      │   │   ├── <div class="tree-box tree-level-4">👥 TEAM ALPHA (Core Engineering)</div><br>
+      │   │   │   ├── <div class="tree-box tree-level-5">👤 Rahul Sharma (@rahul) ──[1-on-1 WhatsApp Chat]── 👤 Amit Patel (@amit)</div><br>
+      │   │   │   └── <div class="tree-box tree-level-5">👤 Priya Singh (@priya) ──[1-on-1 WhatsApp Chat]── 👤 Rahul Sharma (@rahul)</div><br>
+      │   │   │<br>
+      │   │   └── <div class="tree-box tree-level-4">👥 TEAM BETA (Analytics)</div><br>
+      │   │       ├── <div class="tree-box tree-level-5">👤 Rohit Kumar (@rohit) ──[1-on-1 WhatsApp Chat]── 👤 Neha Gupta (@neha)</div><br>
+      │   │       └── <div class="tree-box tree-level-5">🚫 [Rahul ↔ Rohit Chat is BLOCKED: Cross-team restriction]</div><br>
+      │   │<br>
+      │   └── <div class="tree-box tree-level-3">🛡️ ORG ADMIN 2: Beatrice Stone (Assigned: Team Gamma)</div><br>
+      │       └── <div class="tree-box tree-level-4">👥 TEAM GAMMA (Operations) ── 👤 Anita Roy (@anita)</div><br>
+      │<br>
+      └── <div class="tree-box tree-level-2">🏢 TENANT 2: Globex Corporation (100% Database Isolated)</div><br>
+          └── <div class="tree-box tree-level-3">🛡️ ORG ADMIN 3: Dana White ── 👥 GLOBEX RESEARCH (Frank Miller)</div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: END TO END USER ACTION FLOW -->
+  <div class="section page-break">
+    <h2 class="sec-heading">2. End-to-End User Action &amp; Message Flow</h2>
+    <p>Below is the decision-tree and sequence followed when team members and administrators interact with the platform:</p>
+
+    <div class="diagram-card">
+      [🌐 Client Opens SaaS Portal: http://localhost:3005]<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;│<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;├──► [👤 TEAM MEMBER LOGIN: Rahul Sharma]<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├──► Opens /user/messages (WhatsApp Web Split Screen)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── Search or select Amit Patel from conversation list<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── Types message in rounded composer with Enter/Shift+Enter<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;└── Real-time dispatch via Supabase/WebSocket event stream<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└──► Cross-Team Guardrail Check:<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── Shared Team Alpha member (Amit) ──► ✅ ALLOWED<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── Team Beta member (Rohit) ─────────► 🚫 BLOCKED<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── Globex Tenant member (Dana) ──────► 🚫 BLOCKED<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;│<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;├──► [🛡️ ORGANIZATION ADMIN: Alex Vance]<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├──► Opens /admin/conversations (Compliance Live Stream)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── Reviews live 1-on-1 chats in Team Alpha &amp; Beta in Read-Only mode<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;└── System triggers immutable security audit log record<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└──► Opens /admin/audit-logs ──► View timestamped audit trail<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;│<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;└──► [👑 PLATFORM SUPER ADMIN]<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── Provision organizations (Acme Corp, Globex Corp)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── Assign organization administrators &amp; permissions<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── Global system telemetry &amp; security governance
+    </div>
+  </div>
+
+  <!-- SECTION 3: ROLES MATRIX -->
+  <div class="section">
+    <h2 class="sec-heading">3. Roles, Scopes &amp; Permissions Matrix</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Role</th>
+          <th>Authorized Scope</th>
+          <th>Chat Capabilities</th>
+          <th>Admin Oversight</th>
+          <th>PII Visibility</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-red">SUPER_ADMIN</span></td>
+          <td>Global Platform</td>
+          <td>Global conversation inspector</td>
+          <td>Full cross-org access</td>
+          <td>Full Administrative</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-amber">ORG_ADMIN</span></td>
+          <td>Assigned Teams in Org</td>
+          <td>Read-only compliance audit</td>
+          <td>Assigned teams only</td>
+          <td>Org Member Emails</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-green">USER</span></td>
+          <td>Shared Teams Only</td>
+          <td>1-on-1 WhatsApp-style chat</td>
+          <td>Zero access (Strict Deny)</td>
+          <td>Sanitized (@username only)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECTION 4: 5-MINUTE LIVE DEMONSTRATION SCRIPT -->
+  <div class="section page-break">
+    <h2 class="sec-heading">4. 5-Minute Live Client Walkthrough Script</h2>
+    <p>Use this exact 10-step sequence when conducting a live demonstration to prospective clients or stakeholders:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 45px;">Step</th>
+          <th style="width: 130px;">Demo Action</th>
+          <th>What to Say to the Client</th>
+          <th style="width: 140px;">Expected Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>1</strong></td>
+          <td>Open Landing Page</td>
+          <td><em>"This is our SaaS portal displaying multi-tenant governance with instant 1-click evaluation personas."</em></td>
+          <td><span class="badge badge-blue">http://localhost:3005</span></td>
+        </tr>
+        <tr>
+          <td><strong>2</strong></td>
+          <td>Select <strong>Rahul</strong></td>
+          <td><em>"We are logged in as Rahul Sharma, an engineer in Team Alpha. Notice that he only sees his team's environment."</em></td>
+          <td><span class="badge badge-green">User Dashboard</span></td>
+        </tr>
+        <tr>
+          <td><strong>3</strong></td>
+          <td>Open Messages</td>
+          <td><em>"Here is the modern WhatsApp Web chat UI: circular avatars, search filter, green unread badges, and textured wallpaper."</em></td>
+          <td><span class="badge badge-green">/user/messages</span></td>
+        </tr>
+        <tr>
+          <td><strong>4</strong></td>
+          <td>Launch 2-User Demo</td>
+          <td><em>"Let's demonstrate instant two-way real-time messaging between two simultaneous users (Rahul and Amit)."</em></td>
+          <td><span class="badge badge-blue">/demo/chat</span></td>
+        </tr>
+        <tr>
+          <td><strong>5</strong></td>
+          <td>Send Message</td>
+          <td><em>"When Rahul sends a message, watch Amit's screen on the right — it delivers instantly without page refresh."</em></td>
+          <td><span class="badge badge-green">Instant Delivery</span></td>
+        </tr>
+        <tr>
+          <td><strong>6</strong></td>
+          <td>Reply from Amit</td>
+          <td><em>"When Amit replies, Rahul receives it immediately, and message delivery checkmarks turn to blue read receipts."</em></td>
+          <td><span class="badge badge-green">Double Blue Checks</span></td>
+        </tr>
+        <tr>
+          <td><strong>7</strong></td>
+          <td>Cross-Team Test</td>
+          <td><em>"Rahul cannot chat with Rohit because Rohit belongs to Team Beta. Cross-team isolation is enforced at the database level."</em></td>
+          <td><span class="badge badge-amber">Boundary Isolation</span></td>
+        </tr>
+        <tr>
+          <td><strong>8</strong></td>
+          <td>Switch to <strong>Admin 1</strong></td>
+          <td><em>"Now let's switch to Alex Vance (Admin 1). Admins can inspect live team chats in read-only compliance mode."</em></td>
+          <td><span class="badge badge-amber">/admin/conversations</span></td>
+        </tr>
+        <tr>
+          <td><strong>9</strong></td>
+          <td>Inspect Audit Log</td>
+          <td><em>"Every admin inspection automatically generates an immutable audit record for compliance and legal accountability."</em></td>
+          <td><span class="badge badge-amber">/admin/audit-logs</span></td>
+        </tr>
+        <tr>
+          <td><strong>10</strong></td>
+          <td>Switch to <strong>Super Admin</strong></td>
+          <td><em>"Super Admins govern multiple corporate client organizations, manage system admins, and monitor global activity."</em></td>
+          <td><span class="badge badge-red">/super-admin</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECTION 5: SECURITY & COMPLIANCE -->
+  <div class="section">
+    <h2 class="sec-heading">5. Enterprise Compliance &amp; Security Highlights</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+        <strong style="color: #0f172a; font-size: 12px;">🔒 Multi-Tenant RLS Architecture</strong>
+        <p style="font-size: 11px; margin-top: 4px; color: #475569;">
+          PostgreSQL Row Level Security ensures tenant data is completely isolated. Organization A cannot access Organization B records.
+        </p>
+      </div>
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+        <strong style="color: #0f172a; font-size: 12px;">🛡️ Zero PII Exposure (Privacy Guard)</strong>
+        <p style="font-size: 11px; margin-top: 4px; color: #475569;">
+          Regular team members cannot see email addresses or phone numbers. Only public display names and usernames are exposed.
+        </p>
+      </div>
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+        <strong style="color: #0f172a; font-size: 12px;">📜 Tamper-Proof Audit Logging</strong>
+        <p style="font-size: 11px; margin-top: 4px; color: #475569;">
+          All administrative oversight actions append timestamped records into the audit database, preventing unauthorized snooping.
+        </p>
+      </div>
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+        <strong style="color: #0f172a; font-size: 12px;">📱 Full Mobile &amp; Desktop Support</strong>
+        <p style="font-size: 11px; margin-top: 4px; color: #475569;">
+          Adaptive responsive UI: WhatsApp Web on desktop/tablets and WhatsApp Mobile App single-view navigation on phones.
+        </p>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      Private Team Chat Management System • Confidential &amp; Proprietary SaaS Architecture Documentation • Generated September 2026
+    </div>
+  </div>
+
+</body>
+</html>

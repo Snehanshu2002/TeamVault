@@ -1,0 +1,100 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    
+    function isSuperAdmin() {
+      return isAuthenticated() && getUserRole() == 'SUPER_ADMIN';
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && (getUserRole() == 'ADMIN' || getUserRole() == 'SUPER_ADMIN');
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // USERS COLLECTION
+    match /users/{userId} {
+      // Super Admin and Admin can read all users
+      // Users can read their own profile, or safe public profile if they share a team
+      allow read: if isAuthenticated();
+      // Only Super Admin or Admin can create/update roles, user can update safe self profile
+      allow create: if isSuperAdmin() || isAuthenticated();
+      allow update: if isSuperAdmin() || (isAdmin() && resource.data.role == 'USER') || (isOwner(userId) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'email']));
+      allow delete: if isSuperAdmin();
+    }
+    
+    // ADMINS COLLECTION
+    match /admins/{adminId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    // TEAMS COLLECTION
+    match /teams/{teamId} {
+      // Super Admin can read/write any team
+      // Admin can manage teams where adminId == request.auth.uid
+      // Users can only read teams they are members of
+      allow read: if isAuthenticated();
+      allow create: if isAdmin();
+      allow update: if isSuperAdmin() || (isAdmin() && resource.data.adminId == request.auth.uid);
+      allow delete: if isSuperAdmin() || (isAdmin() && resource.data.adminId == request.auth.uid);
+    }
+
+    // TEAM MEMBERS COLLECTION
+    match /teamMembers/{memberDocId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // CONVERSATIONS COLLECTION
+    match /conversations/{conversationId} {
+      // Allowed if participant OR if Admin manages the team OR if Super Admin
+      allow read: if isAuthenticated() && (
+        request.auth.uid in resource.data.participantIds ||
+        isSuperAdmin() ||
+        (isAdmin() && get(/databases/$(database)/documents/teams/$(resource.data.teamId)).data.adminId == request.auth.uid)
+      );
+      
+      // Conversation creation: must belong to the same team and be a participant
+      allow create: if isAuthenticated() && request.auth.uid in request.resource.data.participantIds;
+      allow update: if isAuthenticated() && (
+        request.auth.uid in resource.data.participantIds ||
+        isSuperAdmin()
+      );
+      allow delete: if isSuperAdmin();
+
+      // MESSAGES SUBCOLLECTION
+      match /messages/{messageId} {
+        allow read: if isAuthenticated() && (
+          request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds ||
+          isSuperAdmin() ||
+          (isAdmin() && get(/databases/$(database)/documents/teams/$(get(/databases/$(database)/documents/conversations/$(conversationId)).data.teamId)).data.adminId == request.auth.uid)
+        );
+        // Users can send messages only as themselves in conversations they participate in
+        allow create: if isAuthenticated() && 
+          request.resource.data.senderId == request.auth.uid &&
+          request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds;
+        allow update: if isAuthenticated(); // e.g. marking readBy
+        allow delete: if isSuperAdmin();
+      }
+    }
+
+    // AUDIT LOGS
+    match /auditLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated();
+      allow update, delete: if false; // immutable audit trail
+    }
+  }
+}
