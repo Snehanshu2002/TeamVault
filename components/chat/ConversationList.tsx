@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Conversation, Profile } from '@/lib/types';
 import { ChatService } from '@/lib/services/chatService';
+import { AuthService } from '@/lib/services/authService';
 import { 
   Search, 
   Plus, 
@@ -11,9 +12,15 @@ import {
   CircleDashed, 
   Filter,
   CheckCheck,
-  Users
+  Users,
+  Shield,
+  Lock,
+  LogOut,
+  Settings,
+  X
 } from 'lucide-react';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
+import { useRouter } from 'next/navigation';
 
 export interface ConversationListProps {
   conversations: Conversation[];
@@ -34,6 +41,9 @@ export const ConversationList: React.FC<ConversationListProps> = ({
 }) => {
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState<'ALL' | 'UNREAD'>('ALL');
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [showLeftMenu, setShowLeftMenu] = useState(false);
+  const router = useRouter();
 
   const formatTime = (isoString?: string) => {
     if (!isoString) return '';
@@ -69,6 +79,11 @@ export const ConversationList: React.FC<ConversationListProps> = ({
     return colors[Math.abs(hash) % colors.length];
   };
 
+  const handleLogout = async () => {
+    await AuthService.logout();
+    router.push('/login');
+  };
+
   const filteredConversations = conversations.filter((c) => {
     const summary = ChatService.getParticipantSummary(c, isReadOnlyAdminView ? undefined : currentUser?.id);
     const matchesTitle = summary.title.toLowerCase().includes(search.toLowerCase());
@@ -87,7 +102,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   });
 
   return (
-    <div className="h-full flex flex-col bg-white border-r border-[#e9edef] select-none">
+    <div className="h-full flex flex-col bg-white border-r border-[#e9edef] select-none relative">
       {/* WhatsApp Web Top Left Bar */}
       <div className="h-15 px-4 bg-[#f0f2f5] border-b border-[#e9edef] flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
@@ -108,11 +123,12 @@ export const ConversationList: React.FC<ConversationListProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-1 text-[#54656f]">
+        <div className="flex items-center gap-1 text-[#54656f] relative">
           <button
             type="button"
-            title="Status"
-            className="p-2 hover:bg-slate-200/60 rounded-full transition-colors cursor-pointer"
+            onClick={() => setShowStatusModal(true)}
+            title="View Team Status Stories"
+            className="p-2 hover:bg-slate-200/60 rounded-full transition-colors cursor-pointer text-[#00a884]"
           >
             <CircleDashed className="w-5 h-5" />
           </button>
@@ -128,13 +144,140 @@ export const ConversationList: React.FC<ConversationListProps> = ({
           )}
           <button
             type="button"
+            onClick={() => setShowLeftMenu((prev) => !prev)}
             title="Menu"
-            className="p-2 hover:bg-slate-200/60 rounded-full transition-colors cursor-pointer"
+            className={`p-2 rounded-full transition-colors cursor-pointer ${
+              showLeftMenu ? 'bg-slate-300/80 text-[#111b21]' : 'hover:bg-slate-200/60'
+            }`}
           >
             <MoreVertical className="w-5 h-5" />
           </button>
+
+          {/* Left 3-Dots Dropdown Menu */}
+          {showLeftMenu && (
+            <div className="absolute top-12 right-0 z-30 bg-white border border-slate-200 rounded-2xl shadow-xl py-1.5 w-52 text-xs font-medium text-slate-700">
+              {onNewChat && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowLeftMenu(false);
+                    onNewChat();
+                  }}
+                  className="w-full text-left px-3.5 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer"
+                >
+                  <MessageSquarePlus className="w-4 h-4 text-emerald-600" />
+                  <span>Start New Chat</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  setShowLeftMenu(false);
+                  setShowStatusModal(true);
+                }}
+                className="w-full text-left px-3.5 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer"
+              >
+                <CircleDashed className="w-4 h-4 text-indigo-600" />
+                <span>Team Status Updates</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowLeftMenu(false);
+                  router.push('/user/settings');
+                }}
+                className="w-full text-left px-3.5 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer"
+              >
+                <Settings className="w-4 h-4 text-slate-500" />
+                <span>Account Settings</span>
+              </button>
+              <div className="border-t border-slate-100 my-1" />
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="w-full text-left px-3.5 py-2 hover:bg-rose-50 text-rose-600 flex items-center gap-2 cursor-pointer font-bold"
+              >
+                <LogOut className="w-4 h-4 text-rose-600" />
+                <span>Sign Out</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Status Stories Modal */}
+      {showStatusModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full shadow-2xl overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+            <div className="p-4 bg-emerald-600 text-white flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CircleDashed className="w-5 h-5" />
+                <span className="font-bold text-sm">Team Status & Stories</span>
+              </div>
+              <button
+                onClick={() => setShowStatusModal(false)}
+                className="p-1 hover:bg-emerald-700 rounded-full cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-4 space-y-3 text-xs">
+              <div className="flex items-center gap-3 p-2 rounded-xl bg-slate-50 border border-slate-100">
+                <div className="w-10 h-10 rounded-full border-2 border-emerald-500 p-0.5">
+                  <div className="w-full h-full rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold">
+                    {currentUser?.display_name?.charAt(0) || 'U'}
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-800">My Status</h4>
+                  <p className="text-[11px] text-emerald-600 font-medium">● Online & Available</p>
+                </div>
+              </div>
+
+              <div className="border-t border-slate-100 pt-2">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  Recent Team Updates
+                </span>
+                <div className="mt-2 space-y-2">
+                  <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors">
+                    <div className="w-9 h-9 rounded-full border-2 border-indigo-500 p-0.5">
+                      <div className="w-full h-full rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">
+                        A
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-800">Amit Patel</h4>
+                      <p className="text-[11px] text-slate-500">Working on Sprint Review (Today at 10:15 AM)</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors">
+                    <div className="w-9 h-9 rounded-full border-2 border-purple-500 p-0.5">
+                      <div className="w-full h-full rounded-full bg-purple-600 text-white flex items-center justify-center font-bold text-xs">
+                        A
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-800">Anita Roy</h4>
+                      <p className="text-[11px] text-slate-500">In Meeting with Client (Today at 09:30 AM)</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowStatusModal(false)}
+                  className="px-4 py-1.5 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* WhatsApp Web Search & Filter Bar */}
       <div className="p-2 bg-white border-b border-[#f0f2f5] space-y-2">

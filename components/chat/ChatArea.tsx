@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Conversation, Message, Profile } from '@/lib/types';
 import { MessageItem } from './MessageItem';
 import { MessageInput } from './MessageInput';
@@ -36,6 +36,11 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
   isReadOnlyAdminView = false,
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -103,6 +108,11 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
 
   const avatarBg = getAvatarColor(participantSummary.title);
 
+  // Filter messages by search query if search is active
+  const displayedMessages = searchQuery.trim()
+    ? messages.filter((m) => m.message.toLowerCase().includes(searchQuery.toLowerCase()))
+    : messages;
+
   return (
     <div className="h-full flex flex-col bg-[#efeae2] relative overflow-hidden select-none">
       {/* WhatsApp Web Sticky Chat Header */}
@@ -118,7 +128,11 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
             </button>
           )}
 
-          <div className="relative shrink-0">
+          <div 
+            onClick={() => setShowInfoModal(true)}
+            className="relative shrink-0 cursor-pointer"
+            title="Click to view info"
+          >
             <div
               className={`w-10 h-10 rounded-full ${
                 conversation.conversation_type === 'GROUP' ? 'bg-emerald-600' : avatarBg
@@ -133,7 +147,11 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
             <span className="absolute bottom-0 right-0 w-3 h-3 bg-[#25d366] border-2 border-white rounded-full" />
           </div>
 
-          <div className="min-w-0">
+          <div 
+            onClick={() => setShowInfoModal(true)}
+            className="min-w-0 cursor-pointer"
+            title="Click to view info"
+          >
             <div className="flex items-center gap-1.5 truncate">
               {conversation.conversation_type === 'GROUP' && (
                 <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded shrink-0">
@@ -161,7 +179,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
         </div>
 
         {/* Right Header Options */}
-        <div className="flex items-center gap-1 text-[#54656f]">
+        <div className="flex items-center gap-1 text-[#54656f] relative">
           {isReadOnlyAdminView ? (
             <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100/90 text-amber-800 text-[11px] font-bold border border-amber-300">
               <ShieldCheck className="w-3.5 h-3.5 text-amber-700" />
@@ -171,22 +189,178 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
             <>
               <button
                 type="button"
+                onClick={() => {
+                  setSearchOpen((prev) => !prev);
+                  if (searchOpen) setSearchQuery('');
+                }}
                 title="Search in chat"
-                className="p-2 hover:bg-slate-200/60 rounded-full transition-colors cursor-pointer"
+                className={`p-2 rounded-full transition-colors cursor-pointer ${
+                  searchOpen ? 'bg-slate-300/80 text-[#00a884]' : 'hover:bg-slate-200/60'
+                }`}
               >
                 <Search className="w-5 h-5" />
               </button>
               <button
                 type="button"
+                onClick={() => setMenuOpen((prev) => !prev)}
                 title="Menu"
-                className="p-2 hover:bg-slate-200/60 rounded-full transition-colors cursor-pointer"
+                className={`p-2 rounded-full transition-colors cursor-pointer ${
+                  menuOpen ? 'bg-slate-300/80 text-[#111b21]' : 'hover:bg-slate-200/60'
+                }`}
               >
                 <MoreVertical className="w-5 h-5" />
               </button>
+
+              {/* 3-Dots Dropdown Menu */}
+              {menuOpen && (
+                <div className="absolute top-12 right-0 z-30 bg-white border border-slate-200 rounded-2xl shadow-xl py-1.5 w-52 text-xs font-medium text-slate-700">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowInfoModal(true);
+                      setMenuOpen(false);
+                    }}
+                    className="w-full text-left px-3.5 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer"
+                  >
+                    <Info className="w-4 h-4 text-indigo-600" />
+                    <span>View {conversation.conversation_type === 'GROUP' ? 'Group' : 'Contact'} Info</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsMuted((prev) => !prev);
+                      setMenuOpen(false);
+                    }}
+                    className="w-full text-left px-3.5 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer"
+                  >
+                    <Lock className="w-4 h-4 text-slate-500" />
+                    <span>{isMuted ? 'Unmute Notifications' : 'Mute Notifications'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(messages, null, 2));
+                      const downloadAnchor = document.createElement('a');
+                      downloadAnchor.setAttribute('href', dataStr);
+                      downloadAnchor.setAttribute('download', `audit_chat_${conversation.id}.json`);
+                      document.body.appendChild(downloadAnchor);
+                      downloadAnchor.click();
+                      downloadAnchor.remove();
+                      setMenuOpen(false);
+                    }}
+                    className="w-full text-left px-3.5 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer"
+                  >
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                    <span>Export Chat Transcript</span>
+                  </button>
+                </div>
+              )}
             </>
           )}
         </div>
       </div>
+
+      {/* In-Chat Search Bar */}
+      {searchOpen && (
+        <div className="px-4 py-2 bg-white border-b border-[#e9edef] flex items-center gap-2 z-10 animate-in fade-in slide-in-from-top-2 duration-150">
+          <Search className="w-4 h-4 text-[#54656f]" />
+          <input
+            type="text"
+            placeholder="Search messages in this chat..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="flex-1 bg-transparent text-xs text-slate-800 placeholder-slate-400 focus:outline-none"
+            autoFocus
+          />
+          {searchQuery && (
+            <span className="text-[11px] text-slate-500 font-medium">
+              {displayedMessages.length} found
+            </span>
+          )}
+          <button
+            onClick={() => {
+              setSearchOpen(false);
+              setSearchQuery('');
+            }}
+            className="p-1 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* Info Modal Popup */}
+      {showInfoModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-200">
+            <div className="p-6 bg-slate-900 text-white text-center relative">
+              <button
+                onClick={() => setShowInfoModal(false)}
+                className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white cursor-pointer"
+              >
+                ✕
+              </button>
+              <div
+                className={`w-16 h-16 rounded-full mx-auto mb-3 ${
+                  conversation.conversation_type === 'GROUP' ? 'bg-emerald-600' : avatarBg
+                } text-white font-bold text-2xl flex items-center justify-center shadow-lg`}
+              >
+                {conversation.conversation_type === 'GROUP' ? (
+                  <Users className="w-8 h-8" />
+                ) : (
+                  participantSummary.title.charAt(0)
+                )}
+              </div>
+              <h3 className="text-lg font-bold">{participantSummary.title}</h3>
+              <p className="text-xs text-slate-400 mt-1">{conversation.team_name || 'Team Chat'}</p>
+            </div>
+
+            <div className="p-5 space-y-4 text-xs">
+              <div>
+                <h4 className="font-bold text-slate-700 uppercase tracking-wider mb-2">
+                  Participants ({participantSummary.participantProfiles.length})
+                </h4>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {participantSummary.participantProfiles.map((p) => (
+                    <div
+                      key={p.id}
+                      className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-full bg-slate-800 text-white flex items-center justify-center text-xs font-bold">
+                          {p.display_name.charAt(0)}
+                        </div>
+                        <div>
+                          <span className="font-bold text-slate-900 block">{p.display_name}</span>
+                          <span className="text-[10px] text-slate-500 font-mono">@{p.username}</span>
+                        </div>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                        {p.role}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-3 bg-indigo-50 border border-indigo-100 rounded-xl text-indigo-900 flex items-center gap-2">
+                <Lock className="w-4 h-4 text-indigo-600 shrink-0" />
+                <span>Messages in this conversation are scoped strictly to authorized team members.</span>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowInfoModal(false)}
+                  className="px-4 py-2 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 cursor-pointer"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Admin Live Audit Banner */}
       {isReadOnlyAdminView && (
@@ -225,21 +399,21 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
           <div className="h-40 flex items-center justify-center">
             <div className="w-6 h-6 border-2 border-[#00a884] border-t-transparent rounded-full animate-spin" />
           </div>
-        ) : messages.length === 0 ? (
+        ) : displayedMessages.length === 0 ? (
           <div className="h-48 flex flex-col items-center justify-center text-center p-6">
             <div className="w-12 h-12 rounded-full bg-white/80 text-[#00a884] flex items-center justify-center mb-2 shadow-2xs">
-              <Users className="w-6 h-6" />
+              <Search className="w-6 h-6" />
             </div>
-            <p className="text-[13px] font-semibold text-[#111b21]">No messages yet</p>
+            <p className="text-[13px] font-semibold text-[#111b21]">No matching messages found</p>
             <p className="text-[11.5px] text-[#667781] mt-0.5">
-              Send a message below to start this private conversation.
+              Try searching with a different keyword.
             </p>
           </div>
         ) : (
-          messages.map((msg, index) => {
+          displayedMessages.map((msg, index) => {
             const isCurr = !isReadOnlyAdminView && currentUser?.id === msg.sender_id;
-            const prevMsg = index > 0 ? messages[index - 1] : null;
-            const nextMsg = index < messages.length - 1 ? messages[index + 1] : null;
+            const prevMsg = index > 0 ? displayedMessages[index - 1] : null;
+            const nextMsg = index < displayedMessages.length - 1 ? displayedMessages[index + 1] : null;
 
             const isFirstInGroup = !prevMsg || prevMsg.sender_id !== msg.sender_id;
             const isLastInGroup = !nextMsg || nextMsg.sender_id !== msg.sender_id;
