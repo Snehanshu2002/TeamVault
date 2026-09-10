@@ -111,6 +111,17 @@ export const DEMO_PERSONAS: DemoPersona[] = [
     description: 'Team Gamma Specialist under Admin 2.',
     avatarColor: 'bg-pink-600',
   },
+  {
+    uid: 'u0000000-0000-0000-0000-000000000011',
+    name: 'Snehanshu',
+    username: 'snehanshu',
+    email: 'snehanshu@example.com',
+    role: 'USER',
+    organizationName: 'Acme Corporation',
+    teamNames: ['Acme Core Staff'],
+    description: 'Acme Corporation Team Member. Can be enrolled into teams by Admin.',
+    avatarColor: 'bg-cyan-600',
+  },
 ];
 
 export const INITIAL_ORGANIZATIONS: Organization[] = [
@@ -263,6 +274,18 @@ export const INITIAL_PROFILES: Profile[] = [
     status: 'active',
     created_at: '2026-01-10T00:00:00.000Z',
     updated_at: '2026-01-10T00:00:00.000Z',
+    isOnline: true,
+  },
+  {
+    id: 'u0000000-0000-0000-0000-000000000011',
+    organization_id: 'a0000000-0000-0000-0000-000000000001',
+    username: 'snehanshu',
+    display_name: 'Snehanshu',
+    email: 'snehanshu@example.com',
+    role: 'USER',
+    status: 'active',
+    created_at: '2026-01-22T10:00:00.000Z',
+    updated_at: '2026-01-22T10:00:00.000Z',
     isOnline: true,
   },
 ];
