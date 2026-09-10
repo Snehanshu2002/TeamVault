@@ -94,7 +94,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
         isOnline: true,
       };
 
-      // 1. Save profile
+      // 1. Save profile locally
       mockSupabase.saveProfile(newProfile);
 
       // 2. Assign to selected teams
@@ -128,6 +128,23 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
           assignedTeamsCount: selectedTeamIds.length,
           email: newProfile.email,
         },
+      });
+
+      // 4. Persist to real server database (data/teamvault_db.json) via API
+      fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          full_name: cleanDisplayName,
+          email: cleanEmail,
+          role: isSuperAdmin ? role : 'USER',
+          phone: phone.trim() || undefined,
+          team_ids: selectedTeamIds,
+          organization_id: targetOrgId,
+          created_by: currentUser?.id || 'admin',
+        }),
+      }).catch((apiErr) => {
+        console.warn('API background persistence note:', apiErr);
       });
 
       if (onUserCreated) {

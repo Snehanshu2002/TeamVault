@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { Message, Conversation } from '@/lib/types';
+import { serverDb } from '@/lib/database/serverDb';
 
 // Server-side shared state across all browser clients (Chrome, Edge, Safari, Firefox)
 declare global {
@@ -8,16 +9,18 @@ declare global {
 }
 
 if (!globalThis.__ptcms_server_messages) {
-  globalThis.__ptcms_server_messages = {};
+  // Initialize with persisted messages from serverDb
+  globalThis.__ptcms_server_messages = serverDb.getAllMessagesMap() || {};
 }
 if (!globalThis.__ptcms_server_conversations) {
-  globalThis.__ptcms_server_conversations = [];
+  // Initialize with persisted conversations from serverDb
+  globalThis.__ptcms_server_conversations = serverDb.getConversations() || [];
 }
 
 export async function GET(req: Request) {
   return NextResponse.json({
-    messages: globalThis.__ptcms_server_messages || {},
-    conversations: globalThis.__ptcms_server_conversations || [],
+    messages: globalThis.__ptcms_server_messages || serverDb.getAllMessagesMap(),
+    conversations: globalThis.__ptcms_server_conversations || serverDb.getConversations(),
     timestamp: Date.now(),
   });
 }
@@ -36,6 +39,12 @@ export async function POST(req: Request) {
       if (!existing.some((m) => m.id === message.id)) {
         existing.push(message);
       }
+      // Persist to serverDb on disk
+      try {
+        serverDb.saveMessage(cid, message);
+      } catch (dbErr) {
+        console.warn('DB save message note:', dbErr);
+      }
     }
 
     if (type === 'NEW_CONVERSATION' && conversation) {
@@ -45,6 +54,12 @@ export async function POST(req: Request) {
         convs[idx] = conversation;
       } else {
         convs.unshift(conversation);
+      }
+      // Persist to serverDb on disk
+      try {
+        serverDb.saveConversation(conversation);
+      } catch (dbErr) {
+        console.warn('DB save conversation note:', dbErr);
       }
     }
 
@@ -56,6 +71,12 @@ export async function POST(req: Request) {
             m.read_by.push(readerId);
           }
         });
+      }
+      // Persist read status to serverDb on disk
+      try {
+        serverDb.markMessagesRead(convId, readerId);
+      } catch (dbErr) {
+        console.warn('DB mark read note:', dbErr);
       }
     }
 
