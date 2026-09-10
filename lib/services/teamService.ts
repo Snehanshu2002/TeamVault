@@ -87,6 +87,14 @@ export class TeamService {
       team.updated_at = new Date().toISOString();
       mockSupabase.saveTeam(team);
 
+      if (typeof window !== 'undefined') {
+        fetch('/api/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'UPDATE_TEAM', team }),
+        }).catch(() => {});
+      }
+
       mockSupabase.addAuditLog({
         organization_id: team.organization_id,
         actor_id: actor.id,
@@ -110,6 +118,14 @@ export class TeamService {
       team.memberIds = team.memberIds.filter((id) => id !== userId);
       team.updated_at = new Date().toISOString();
       mockSupabase.saveTeam(team);
+
+      if (typeof window !== 'undefined') {
+        fetch('/api/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'UPDATE_TEAM', team }),
+        }).catch(() => {});
+      }
 
       mockSupabase.addAuditLog({
         organization_id: team.organization_id,

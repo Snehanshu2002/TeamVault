@@ -881,10 +881,57 @@ class MockSupabaseService {
         const data = await res.json();
         const serverMessages: Record<string, Message[]> = data.messages || {};
         const serverConversations: Conversation[] = data.conversations || [];
+        const serverProfiles: Profile[] = data.profiles || [];
+        const serverTeams: Team[] = data.teams || [];
         let messagesUpdated = false;
         let convsUpdated = false;
+        let profilesUpdated = false;
+        let teamsUpdated = false;
 
-        // Sync messages
+        // 1. Sync profiles
+        if (Array.isArray(serverProfiles) && serverProfiles.length > 0) {
+          const currentProfiles = this.getProfiles();
+          for (const sp of serverProfiles) {
+            const existingIdx = currentProfiles.findIndex(
+              (p) => p.id === sp.id || (sp.username && p.username.toLowerCase() === sp.username.toLowerCase())
+            );
+            if (existingIdx === -1) {
+              currentProfiles.push(sp);
+              profilesUpdated = true;
+            }
+          }
+          if (profilesUpdated) {
+            memProfiles = currentProfiles;
+            localStorage.setItem(PROFILES_KEY, JSON.stringify(currentProfiles));
+            this.notifyListeners('PROFILES_UPDATED', currentProfiles);
+          }
+        }
+
+        // 2. Sync teams
+        if (Array.isArray(serverTeams) && serverTeams.length > 0) {
+          const currentTeams = this.getTeams();
+          for (const st of serverTeams) {
+            const existingIdx = currentTeams.findIndex((t) => t.id === st.id);
+            if (existingIdx === -1) {
+              currentTeams.push(st);
+              teamsUpdated = true;
+            } else if (
+              JSON.stringify(currentTeams[existingIdx].memberIds || []) !==
+              JSON.stringify(st.memberIds || [])
+            ) {
+              currentTeams[existingIdx].memberIds = st.memberIds;
+              currentTeams[existingIdx].updated_at = st.updated_at;
+              teamsUpdated = true;
+            }
+          }
+          if (teamsUpdated) {
+            memTeams = currentTeams;
+            localStorage.setItem(TEAMS_KEY, JSON.stringify(currentTeams));
+            this.notifyListeners('TEAMS_UPDATED', currentTeams);
+          }
+        }
+
+        // 3. Sync messages
         let currentAll: Record<string, Message[]> = {};
         try {
           const d = localStorage.getItem(MESSAGES_KEY);
@@ -914,7 +961,7 @@ class MockSupabaseService {
           localStorage.setItem(MESSAGES_KEY, JSON.stringify(currentAll));
         }
 
-        // Sync conversations
+        // 4. Sync conversations
         const localConvs = this.getConversations();
         for (const sc of serverConversations) {
           const existing = localConvs.find((c) => c.id === sc.id);

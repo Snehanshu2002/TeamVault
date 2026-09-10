@@ -149,6 +149,28 @@ export class AuthService {
 
     mockSupabase.saveProfile(newProfile);
     mockSupabase.setCurrentUser(newProfile);
+
+    if (typeof window !== 'undefined') {
+      fetch('/api/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'NEW_PROFILE', profile: newProfile }),
+      }).catch(() => {});
+
+      fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          full_name: newProfile.display_name,
+          username: newProfile.username,
+          email: newProfile.email,
+          role: newProfile.role,
+          organization_id: newProfile.organization_id,
+          created_by: 'self_registration',
+        }),
+      }).catch(() => {});
+    }
+
     return newProfile;
   }
 

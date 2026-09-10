@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
-import { Team } from '@/lib/types';
+import { Team, Profile } from '@/lib/types';
 import { mockSupabase } from '@/lib/supabase/mockSupabase';
 import { Plus, Trash2 } from 'lucide-react';
 
@@ -23,10 +23,29 @@ export const ManageMembersModal: React.FC<ManageMembersModalProps> = ({
   onRemoveMember,
 }) => {
   const [selectedAddUserId, setSelectedAddUserId] = useState('');
+  const [profiles, setProfiles] = useState<Profile[]>(() => mockSupabase.getProfiles());
+
+  useEffect(() => {
+    const update = () => {
+      setProfiles(mockSupabase.getProfiles());
+    };
+    update();
+    const unsub = mockSupabase.subscribe((event) => {
+      if (event === 'PROFILES_UPDATED' || event === 'STORAGE_SYNC' || event === 'TEAMS_UPDATED') {
+        update();
+      }
+    });
+    return () => unsub();
+  }, [isOpen]);
 
   if (!team) return null;
 
-  const allUsers = mockSupabase.getProfiles().filter((u) => u.role === 'USER' && u.organization_id === team.organization_id);
+  const targetOrgId = team.organization_id || 'a0000000-0000-0000-0000-000000000001';
+  const allUsers = profiles.filter(
+    (u) =>
+      u.role !== 'PLATFORM_SUPER_ADMIN' &&
+      (u.organization_id === targetOrgId || !u.organization_id || u.organization_id === 'org-1' || targetOrgId === 'org-1')
+  );
   const currentMemberIds = team.memberIds || [];
   const currentMembers = allUsers.filter((u) => currentMemberIds.includes(u.id));
   const availableUsersToAdd = allUsers.filter((u) => !currentMemberIds.includes(u.id));
