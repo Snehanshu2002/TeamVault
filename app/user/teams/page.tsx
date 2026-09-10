@@ -27,6 +27,16 @@ export default function UserTeamsPage() {
     }
   };
 
+  const handleStartGroupChat = (team: Team) => {
+    if (!user) return;
+    try {
+      const groupConv = ChatService.getOrCreateTeamGroupConversation(team.organization_id || user.organization_id, team.id);
+      router.push(`/user/messages?convId=${groupConv.id}`);
+    } catch (err: any) {
+      alert(err.message || 'Cannot initiate team group chat');
+    }
+  };
+
   return (
     <DashboardLayout allowedRoles={['USER', 'ORGANIZATION_ADMIN', 'PLATFORM_SUPER_ADMIN']}>
       <div className="space-y-6">
@@ -38,7 +48,7 @@ export default function UserTeamsPage() {
               <span>My Assigned Teams</span>
             </h1>
             <p className="text-xs text-slate-500 mt-1">
-              Teams you belong to. You can private chat with members in the same team.
+              Teams you belong to. You can private chat with members in the same team or talk together in Team Group Chat.
             </p>
           </div>
 
@@ -73,7 +83,9 @@ export default function UserTeamsPage() {
                   team={team}
                   members={members}
                   currentUserRole={user?.role || 'USER'}
+                  currentUserId={user?.id}
                   onStartChatWithMember={(member, t) => handleStartChat(member, t)}
+                  onStartTeamGroupChat={(t) => handleStartGroupChat(t)}
                 />
               );
             })}

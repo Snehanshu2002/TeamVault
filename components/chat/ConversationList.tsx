@@ -10,7 +10,8 @@ import {
   MoreVertical, 
   CircleDashed, 
   Filter,
-  CheckCheck
+  CheckCheck,
+  Users
 } from 'lucide-react';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
 
@@ -205,9 +206,15 @@ export const ConversationList: React.FC<ConversationListProps> = ({
                 {/* Circular Avatar */}
                 <div className="relative shrink-0">
                   <div
-                    className={`w-12 h-12 rounded-full ${avatarBg} text-white font-bold text-base flex items-center justify-center shadow-2xs`}
+                    className={`w-12 h-12 rounded-full ${
+                      conv.conversation_type === 'GROUP' ? 'bg-emerald-600' : avatarBg
+                    } text-white font-bold text-base flex items-center justify-center shadow-2xs`}
                   >
-                    {summary.title.charAt(0)}
+                    {conv.conversation_type === 'GROUP' ? (
+                      <Users className="w-5 h-5 text-white" />
+                    ) : (
+                      summary.title.charAt(0)
+                    )}
                   </div>
                   <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#25d366] border-2 border-white rounded-full" />
                 </div>
@@ -215,9 +222,16 @@ export const ConversationList: React.FC<ConversationListProps> = ({
                 {/* Conversation Details */}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-1 mb-0.5">
-                    <h4 className="text-[14.5px] font-semibold text-[#111b21] truncate">
-                      {summary.title}
-                    </h4>
+                    <div className="flex items-center gap-1.5 truncate">
+                      {conv.conversation_type === 'GROUP' && (
+                        <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded shrink-0">
+                          GROUP
+                        </span>
+                      )}
+                      <h4 className="text-[14.5px] font-semibold text-[#111b21] truncate">
+                        {summary.title}
+                      </h4>
+                    </div>
                     <span
                       className={`text-[11px] shrink-0 ${
                         unreadCount > 0 ? 'text-[#25d366] font-bold' : 'text-[#667781]'

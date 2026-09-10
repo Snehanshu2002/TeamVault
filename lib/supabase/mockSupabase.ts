@@ -790,6 +790,27 @@ class MockSupabaseService {
     return newConv;
   }
 
+  public saveConversation(conv: Conversation): Conversation {
+    const convs = this.getConversations();
+    const idx = convs.findIndex((c) => c.id === conv.id);
+    if (idx >= 0) {
+      convs[idx] = conv;
+    } else {
+      convs.unshift(conv);
+    }
+    memConversations = convs;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(CONVERSATIONS_KEY, JSON.stringify(convs));
+      fetch('/api/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'NEW_CONVERSATION', conversation: conv }),
+      }).catch(() => {});
+    }
+    this.broadcast('CONVERSATIONS_UPDATED', convs);
+    return conv;
+  }
+
   // Messages
   public getMessages(convId: string): Message[] {
     if (typeof window === 'undefined') return memMessages[convId] || [];

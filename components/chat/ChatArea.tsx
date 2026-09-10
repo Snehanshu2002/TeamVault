@@ -120,21 +120,42 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
 
           <div className="relative shrink-0">
             <div
-              className={`w-10 h-10 rounded-full ${avatarBg} text-white font-bold flex items-center justify-center text-sm shadow-2xs`}
+              className={`w-10 h-10 rounded-full ${
+                conversation.conversation_type === 'GROUP' ? 'bg-emerald-600' : avatarBg
+              } text-white font-bold flex items-center justify-center text-sm shadow-2xs`}
             >
-              {participantSummary.title.charAt(0)}
+              {conversation.conversation_type === 'GROUP' ? (
+                <Users className="w-5 h-5 text-white" />
+              ) : (
+                participantSummary.title.charAt(0)
+              )}
             </div>
             <span className="absolute bottom-0 right-0 w-3 h-3 bg-[#25d366] border-2 border-white rounded-full" />
           </div>
 
           <div className="min-w-0">
-            <h2 className="text-[15px] font-semibold text-[#111b21] truncate leading-tight">
-              {participantSummary.title}
-            </h2>
+            <div className="flex items-center gap-1.5 truncate">
+              {conversation.conversation_type === 'GROUP' && (
+                <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded shrink-0">
+                  GROUP
+                </span>
+              )}
+              <h2 className="text-[15px] font-semibold text-[#111b21] truncate leading-tight">
+                {participantSummary.title}
+              </h2>
+            </div>
             <div className="text-[12px] text-[#667781] flex items-center gap-1.5 truncate">
-              <span className="text-[#00a884] font-medium">online</span>
-              <span>•</span>
-              <span className="truncate">{conversation.team_name || 'Team Chat'}</span>
+              {conversation.conversation_type === 'GROUP' ? (
+                <span className="truncate">
+                  {conversation.participantIds.length} members: {participantSummary.participantProfiles.map(p => p.display_name).join(', ')}
+                </span>
+              ) : (
+                <>
+                  <span className="text-[#00a884] font-medium">online</span>
+                  <span>•</span>
+                  <span className="truncate">{conversation.team_name || 'Team Chat'}</span>
+                </>
+              )}
             </div>
           </div>
         </div>
